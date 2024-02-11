@@ -1,4 +1,4 @@
-library ViDelphiDll_Rio;
+library ViDelphiDll;
 
 uses
   System.SysUtils,
