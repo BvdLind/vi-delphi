@@ -94,6 +94,8 @@ type
     FInMark: Boolean;
     FInGotoMark: Boolean;
 
+    FInMoveTo: Boolean;
+
     { --- Functions and Procedures --- }
     { General }
     procedure FillViBindings();
@@ -106,6 +108,7 @@ type
     function CharAtRelativeLocation(ACol: Integer): TViCharClass;
     procedure FindNextWordAtCursor(const ACount: Integer);
     procedure FindWordAtCursor(const AView: IOTAEditView; const ACount: Integer);
+    procedure MoveToChar(const AChar: Char);
 
     { Text Editing }
     procedure ChangeIndentation(ADirection: TDirection);
@@ -150,6 +153,7 @@ type
     procedure ActionAppend;
     procedure ActionChange;
     procedure ActionDelete;
+    procedure ActionMoveTo;
     procedure ActionJump;
     procedure ActionInsert;
     procedure ActionSetMark;
@@ -563,6 +567,8 @@ begin
       SaveMarkPosition
     else if FInGotoMark then
       MoveToMarkPosition
+    else if FInMoveTo then
+      MoveToChar(AChar)
     else if CharInSet(FCurrentChar, ['0' .. '9']) then
       ActionUpdateCount
     else if FViMoveKeybinds.ContainsKey(FCurrentChar) then
@@ -644,6 +650,7 @@ begin
   FViKeybinds.Add('c', ActionChange);
   FViKeybinds.Add('d', ActionDelete);
   FViMoveKeybinds.Add('e', ActionMoveEndOfNextWord);
+  FViKeybinds.Add('f', ActionMoveTo);
   FViKeybinds.Add('g', ActionJump);
   FViMoveKeybinds.Add('h', ActionMoveLeft);
   FViKeybinds.Add('i', ActionInsert);
@@ -710,6 +717,24 @@ begin
   ApplyActionToSelection(baYank, False);
   FCursorPosition.Restore;
   currentEditMode := emNone;
+end;
+
+procedure TViEngine.MoveToChar(const AChar: Char);
+begin
+  FCursorPosition.Save;
+  FCursorPosition.MoveRelative(0, 1);
+  while FCursorPosition.Character <> AChar do
+  begin
+    if FCursorPosition.Character = #$D then
+    begin
+      FCursorPosition.Restore;
+      Break;
+    end;
+
+    FCursorPosition.MoveRelative(0, 1);
+  end;
+
+  FInMoveTo := False;
 end;
 
 procedure TViEngine.MoveToMarkPosition;
@@ -1186,6 +1211,13 @@ begin
 
     FCursorPosition.MoveRelative(0, -1);
   end;
+end;
+
+// f
+procedure TViEngine.ActionMoveTo;
+begin
+  if not FInMoveTo then
+    FInMoveTo := True;
 end;
 
 // g
