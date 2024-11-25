@@ -1226,7 +1226,7 @@ begin
   { TODO : Look for better name of this function }
   if FInGo then
   begin
-    FCursorPosition.Move(1, 1);
+    FCursorPosition.Move(FEditCount, 1);
     FInGo := False;
   end
   else
