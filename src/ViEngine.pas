@@ -1,8 +1,9 @@
 {
   This file contains the implementation of Vi keybinds in the Delphi IDE.
 
-  Copyright (c) 2016 Peter Ross
-  Copyright (C) 2021  Kai Anter
+  Copyright (C) 2016 Peter Ross
+  Copyright (C) 2021 Kai Anter
+  Copyright (C) 2021 Bas van der Linden
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -622,6 +623,7 @@ begin
   FViMoveKeybinds.Add(' ', ActionMoveRight);
   FViMoveKeybinds.Add('$', ActionMoveEOL);
   FViKeybinds.Add('.', ActionRepeatLastCommand);
+  FViKeybinds.Add(';', ActionRepeatLastMovement);
   FViMoveKeybinds.Add('0', ActionMoveBOLorCount);
   FViKeybinds.Add('<', ActionShiftLeft);
   FViKeybinds.Add('>', ActionShiftRight);
@@ -735,6 +737,8 @@ begin
   end;
 
   FInMoveTo := False;
+
+  SavePreviousAction;
 end;
 
 procedure TViEngine.MoveToMarkPosition;
@@ -894,6 +898,17 @@ begin
   FCurrentCount := FPreviousAction.FCurrentCount;
   HandleChar(FPreviousAction.ActionChar);
   FInRepeatChange := False;
+end;
+
+// ;
+procedure TViEngine.ActionRepeatLastMovement;
+begin
+  FInMoveTo := True;
+  currentEditMode := FPreviousAction.FCurrentEditMode;
+  FEditCount := FPreviousAction.FEditCount;
+  FCurrentCount := FPreviousAction.FCurrentCount;
+  HandleChar(FPreviousAction.ActionChar);
+  FInMoveTo := False;
 end;
 
 // 0 -> count handling in ActionUpdateCount
